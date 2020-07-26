@@ -141,6 +141,7 @@ public final class DiscordListener extends ListenerAdapter {
         embedBuilder.setTitle("History for " + player.getName() + " (Limit: " + holders.size() + "):");
 
         for (int i = 0; i < amount; i++) {
+            if (holders.size() < i + 1) continue;
             final InformationHolder holder = holders.get(i);
 
             if (holder == null) {
@@ -189,7 +190,7 @@ public final class DiscordListener extends ListenerAdapter {
     private StringBuilder getFormattedIPHistoryInformation(final HistoryHolder holder) {
         final StringBuilder builder = new StringBuilder();
 
-        builder.append(" - [" + holder.getDate() + "] " + holder.getName() + ": " + holder.getIp());
+        builder.append(" - [" + holder.getDate() + "] " + holder.getName() + ": " + holder.getIp() + "\n");
 
         return builder;
     }
