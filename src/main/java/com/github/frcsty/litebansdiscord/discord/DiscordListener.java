@@ -40,7 +40,7 @@ public final class DiscordListener extends ListenerAdapter {
         }
 
         final String content = event.getMessage().getContentRaw();
-        if (!content.startsWith(PREFIX)) {
+        if (!content.startsWith(PREFIX) && !content.contains("checkban") && !content.contains("history") && !content.contains("iphistory")) {
             return;
         }
 
@@ -112,7 +112,6 @@ public final class DiscordListener extends ListenerAdapter {
             final EmbedBuilder embedBuilder = new EmbedBuilder().setColor(Color.CYAN);
             embedBuilder.setTitle("Target " + player.getName() + " is banned:");
 
-            System.out.println(active.getIp());
             embedBuilder.setDescription(getFormatterCheckBanInformation(active));
             channel.sendMessage(embedBuilder.build()).queue();
         } else {
@@ -129,7 +128,8 @@ public final class DiscordListener extends ListenerAdapter {
 
         final OfflinePlayer player = Bukkit.getOfflinePlayer(args[1]);
         final List<InformationHolder> holders = getUserBans(player);
-        final int amount = args.length < 3 ? 1 : Integer.valueOf(args[2]);
+        final int from = args.length < 3 ? 0 : Integer.valueOf(args[2]);
+        final int to = args.length < 4 ? from + 5 : Integer.valueOf(args[3]);
 
         if (holders.size() == 0) {
             channel.sendMessage("User " + player.getName() + " has no history.").queue();
@@ -140,7 +140,7 @@ public final class DiscordListener extends ListenerAdapter {
         final EmbedBuilder embedBuilder = new EmbedBuilder().setColor(Color.CYAN);
         embedBuilder.setTitle("History for " + player.getName() + " (Limit: " + holders.size() + "):");
 
-        for (int i = 0; i < amount; i++) {
+        for (int i = from; i < to; i++) {
             if (holders.size() < i + 1) continue;
             final InformationHolder holder = holders.get(i);
 
@@ -148,7 +148,7 @@ public final class DiscordListener extends ListenerAdapter {
                 continue;
             }
 
-            builder.append(getFormattedHistoryInformation(holder));
+            builder.append(getFormattedHistoryInformation(holder, i));
         }
 
         embedBuilder.setDescription(builder.toString());
@@ -169,11 +169,11 @@ public final class DiscordListener extends ListenerAdapter {
         return builder;
     }
 
-    private StringBuilder getFormattedHistoryInformation(final InformationHolder holder) {
+    private StringBuilder getFormattedHistoryInformation(final InformationHolder holder, final int position) {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("```\n");
-        builder.append("Time: " + new Date(holder.getTime()) + "\n");
+        builder.append("[" + (position + 1) + "] Time: " + new Date(holder.getTime()) + "\n");
         builder.append(" - Reason: " + holder.getReason() + "\n");
         builder.append(" - Banned By: " + holder.getPunisher() + "\n");
 
