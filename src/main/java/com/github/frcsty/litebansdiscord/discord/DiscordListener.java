@@ -40,7 +40,7 @@ public final class DiscordListener extends ListenerAdapter {
         }
 
         final String content = event.getMessage().getContentRaw();
-        if (!content.startsWith(PREFIX) && !content.contains("checkban") && !content.contains("history") && !content.contains("iphistory")) {
+        if (!content.startsWith(PREFIX) && !content.startsWith(event.getGuild().getSelfMember().getAsMention()) && !content.contains("checkban") && !content.contains("history") && !content.contains("iphistory")) {
             return;
         }
 
