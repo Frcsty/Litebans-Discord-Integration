@@ -1,0 +1,40 @@
+plugins {
+	id "com.github.johnrengelman.shadow" version "6.0.0"
+	id "java"
+}
+
+group = "com.github.frcsty"
+version = "1.0.0"
+
+repositories {
+	mavenCentral()
+	maven {
+		url = "https://repo.destroystokyo.com/repository/maven-public/"
+	}
+	maven {
+		url = "https://jitpack.io/"
+	}
+	maven {
+		url = "https://jcenter.bintray.com"
+	}
+}
+
+dependencies {
+	testImplementation "junit:junit:3.8.2"
+	implementation "net.dv8tion:JDA:3.8.3_463"
+	compileOnly "com.gitlab.ruany:LiteBansAPI:0.3.4"
+	compileOnly "com.destroystokyo.paper:paper-api:1.16.1-R0.1-SNAPSHOT"
+}
+
+processResources {
+	from(sourceSets.main.resources.srcDirs) {
+		filter org.apache.tools.ant.filters.ReplaceTokens, tokens: [version: project.version]
+	}
+}
+
+shadowJar {
+	relocate "net.dv8tion", "com.github.frcsty.litebansdiscord"
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8

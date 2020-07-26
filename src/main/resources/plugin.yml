@@ -1,0 +1,4 @@
+name: LiteBansDiscord
+version: @version@
+main: com.github.frcsty.litebansdiscord.LiteBansDiscord
+depend: ["LiteBans"]
