@@ -4,47 +4,37 @@ import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.command.CheckBanCommand
 import com.github.frcsty.litebansdiscord.discord.command.HistoryCommand
 import com.github.frcsty.litebansdiscord.discord.command.IpHistoryCommand
-import me.mattstudios.mfjda.base.CommandManager
-import net.dv8tion.jda.api.JDA
-import net.dv8tion.jda.api.JDABuilder
-import net.dv8tion.jda.api.OnlineStatus
-import net.dv8tion.jda.api.utils.cache.CacheFlag
+import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.JDABuilder
+import net.dv8tion.jda.core.OnlineStatus
 import java.util.logging.Level
 import javax.security.auth.login.LoginException
 
 class Discord(private val plugin: DiscordPlugin) {
 
-    private var jda: JDA? = null
+    private val jda: JDA? = startBot()
 
     private fun setupDiscord() {
-        if (jda != null) {
-            return
-        }
-        jda = startBot()
+        if (jda == null) return
 
-        val commandManager = CommandManager(jda, "-")
-
-        commandManager.register(listOf(
-                CheckBanCommand(plugin),
-                HistoryCommand(plugin),
-                IpHistoryCommand(plugin)
-        ))
-        println("Registered commands")
+        jda.addEventListener(IpHistoryCommand(plugin))
+        jda.addEventListener(HistoryCommand(plugin))
+        jda.addEventListener(CheckBanCommand(plugin))
     }
 
     private fun startBot(): JDA? {
         return try {
-            JDABuilder.create(plugin.config.getString("settings.token"), emptyList())
-                    .disableCache(CacheFlag.ACTIVITY, CacheFlag.VOICE_STATE, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS)
+            JDABuilder().setToken(plugin.config.getString("settings.token"))
                     .setStatus(OnlineStatus.ONLINE)
                     .build().awaitReady()
         } catch (ex: LoginException) {
             plugin.logger.log(Level.WARNING, "Discord bot was unable to start! Please verify the bot token is correct.")
             plugin.pluginLoader.disablePlugin(plugin)
-            null
+            return null
         } catch (ex: InterruptedException) {
             plugin.logger.log(Level.WARNING, "Discord bot was unable to start! Please verify the bot token is correct.")
-            null
+            plugin.pluginLoader.disablePlugin(plugin)
+            return null
         }
     }
 

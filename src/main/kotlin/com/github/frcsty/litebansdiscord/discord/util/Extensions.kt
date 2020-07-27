@@ -1,11 +1,11 @@
 package com.github.frcsty.litebansdiscord.discord.util
 
 import litebans.api.Database
-import net.dv8tion.jda.api.Permission
-import net.dv8tion.jda.api.entities.Member
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.Role
-import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.entities.Member
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.Role
+import net.dv8tion.jda.core.entities.User
 import org.bukkit.OfflinePlayer
 import java.sql.SQLException
 import java.util.*
@@ -32,19 +32,16 @@ fun OfflinePlayer.getUserBans(): List<InformationHolder> {
             statement.setString(1, uuid)
             statement.executeQuery().use { result ->
                 while (result.next()) {
-                    val id = result.getLong("id")
-                    val ip = result.getString("ip")
-                    val removedByDate = result.getTimestamp("removed_by_date")
-                    val reason = result.getString("reason")
-                    val bannedByName = result.getString("banned_by_name")
+                    val reason = result.getString("reason")?: "Unknown"
+                    val bannedByName = result.getString("banned_by_name")?: "Unknown"
                     val time = result.getLong("time")
                     val until = result.getLong("until")
                     val active = result.getBoolean("active")
-                    val serverScope = result.getString("server_scope")
-                    val serverOrigin = result.getString("server_origin")
+                    val serverScope = result.getString("server_scope")?: "Unknown"
+                    val serverOrigin = result.getString("server_origin")?: "Unknown"
                     val silent = result.getBoolean("silent")
                     val ipBan = result.getBoolean("ipban")
-                    holders.add(InformationHolder(reason, bannedByName, time, until, id, active, ip, removedByDate, serverScope, serverOrigin, silent, ipBan))
+                    holders.add(InformationHolder(reason, bannedByName, time, until, active, serverScope, serverOrigin, silent, ipBan))
                 }
             }
         }
@@ -65,9 +62,10 @@ fun OfflinePlayer.getUserIPHistory(): List<HistoryHolder> {
                 while (result.next()) {
                     val id = result.getLong("id")
                     val date = result.getTimestamp("date")
-                    val name = result.getString("name")
-                    val uuidString = result.getString("uuid")
-                    val ip = result.getString("ip")
+                    val name = result.getString("name")?: "Unknown"
+                    val uuidString = result.getString("uuid")?: "Unknown"
+                    var ip = result.getString("ip")
+                    if (ip.equals("#", ignoreCase = false)) ip = "Unknown"
                     holders.add(HistoryHolder(id, date, name, uuidString, ip))
                 }
             }
