@@ -2,9 +2,9 @@ package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.getUserBans
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.hasMissingPermission
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.isNotUser
+import com.github.frcsty.litebansdiscord.discord.util.getUserBans
+import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
+import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import litebans.api.Database
 import me.mattstudios.mfjda.annotations.Command
 import me.mattstudios.mfjda.annotations.Default
@@ -24,9 +24,8 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : CommandBase() {
         val channel = message.channel
         val user = message.author
 
-        if (isNotUser(user, message)) return
-        if (message.member == null) return
-        if (hasMissingPermission(message.member!!, plugin.config.getString("settings.requiredRoleId"))) {
+        if (user.isNotMember(message)) return
+        if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
             channel.sendMessage("You do not have the required permission for this!").queue()
             return
         }
@@ -43,7 +42,7 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : CommandBase() {
             channel.sendMessage("User ${player.name} is not banned!").queue()
             return
         }
-        val holders = getUserBans(player)
+        val holders = player.getUserBans()
         var activeHolder: InformationHolder? = null
         for (holder in holders) {
             if (holder.isActive) {

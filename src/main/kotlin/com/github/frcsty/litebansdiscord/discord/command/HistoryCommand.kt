@@ -2,9 +2,9 @@ package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.getUserBans
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.hasMissingPermission
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.isNotUser
+import com.github.frcsty.litebansdiscord.discord.util.getUserBans
+import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
+import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import me.mattstudios.mfjda.annotations.Command
 import me.mattstudios.mfjda.annotations.Default
 import me.mattstudios.mfjda.base.CommandBase
@@ -25,9 +25,8 @@ class HistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
         val channel = message.channel
         val user = message.author
 
-        if (isNotUser(user, message)) return
-        if (message.member == null) return
-        if (hasMissingPermission(message.member!!, plugin.config.getString("settings.requiredRoleId"))) {
+        if (user.isNotMember(message)) return
+        if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
             channel.sendMessage("You do not have the required permission for this!").queue()
             return
         }
@@ -39,7 +38,7 @@ class HistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
         }
 
         val player = Bukkit.getOfflinePlayer(args[1])
-        val holders = getUserBans(player)
+        val holders = player.getUserBans()
         val fromPosition = if (args.size < 3) 0 else Integer.valueOf(args[2])
         val toPosition = if (args.size < 4) fromPosition + 5 else Integer.valueOf(args[3])
         if (holders.isEmpty()) {
