@@ -21,7 +21,9 @@ repositories {
 
 dependencies {
 	testImplementation "junit:junit:3.8.2"
-	implementation "net.dv8tion:JDA:4.2.0_182"
+	implementation("net.dv8tion:JDA:4.2.0_182") {
+		exclude module: "opus-java"
+	}
 	implementation "me.mattstudios.utils:matt-framework-jda:1.1.14-BETA"
 	compileOnly "com.gitlab.ruany:LiteBansAPI:0.3.4"
 	compileOnly "com.destroystokyo.paper:paper-api:1.16.1-R0.1-SNAPSHOT"
@@ -34,7 +36,7 @@ processResources {
 }
 
 shadowJar {
-	relocate "net.dv8tion", "com.github.frcsty.litebansdiscord"
+	relocate "me.mattstudios.utils", "com.github.frcsty.utils"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

@@ -5,6 +5,7 @@ import com.github.frcsty.litebansdiscord.discord.util.HistoryHolder;
 import com.github.frcsty.litebansdiscord.discord.util.Utilities;
 import me.mattstudios.mfjda.annotations.Command;
 import me.mattstudios.mfjda.annotations.Default;
+import me.mattstudios.mfjda.annotations.Prefix;
 import me.mattstudios.mfjda.base.CommandBase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -16,7 +17,8 @@ import org.bukkit.OfflinePlayer;
 import java.awt.*;
 import java.util.List;
 
-@Command("-iphistory")
+@Prefix("-")
+@Command("iphistory")
 public final class IpHistoryCommand extends CommandBase {
 
     private final DiscordPlugin plugin;

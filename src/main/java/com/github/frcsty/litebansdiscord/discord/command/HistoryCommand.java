@@ -5,6 +5,7 @@ import com.github.frcsty.litebansdiscord.discord.util.InformationHolder;
 import com.github.frcsty.litebansdiscord.discord.util.Utilities;
 import me.mattstudios.mfjda.annotations.Command;
 import me.mattstudios.mfjda.annotations.Default;
+import me.mattstudios.mfjda.annotations.Prefix;
 import me.mattstudios.mfjda.base.CommandBase;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -18,7 +19,8 @@ import java.awt.*;
 import java.util.Date;
 import java.util.List;
 
-@Command("-history")
+@Prefix("-")
+@Command("history")
 public final class HistoryCommand extends CommandBase {
 
     private final DiscordPlugin plugin;
@@ -29,6 +31,7 @@ public final class HistoryCommand extends CommandBase {
 
     @Default
     public void historyCommand() {
+        System.out.println("Ran history command");
         final Message message = getMessage();
         final MessageChannel channel = message.getChannel();
         final User user = message.getAuthor();
