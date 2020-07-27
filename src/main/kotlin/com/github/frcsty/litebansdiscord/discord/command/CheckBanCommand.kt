@@ -20,7 +20,6 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : CommandBase() {
 
     @Default
     fun checkBanCommand() {
-        val message = message
         val channel = message.channel
         val user = message.author
 
