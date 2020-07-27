@@ -20,7 +20,7 @@ class Discord(private val plugin: DiscordPlugin) {
         if (jda != null) {
             return
         }
-        startBot()
+        jda = startBot()
 
         val commandManager = CommandManager(jda, "-")
 
@@ -29,20 +29,22 @@ class Discord(private val plugin: DiscordPlugin) {
                 HistoryCommand(plugin),
                 IpHistoryCommand(plugin)
         ))
+        println("Registered commands")
     }
 
-    private fun startBot() {
-        try {
-            jda = JDABuilder.create(plugin.config.getString("settings.token"), emptyList())
+    private fun startBot(): JDA? {
+        return try {
+            JDABuilder.create(plugin.config.getString("settings.token"), emptyList())
                     .disableCache(CacheFlag.ACTIVITY, CacheFlag.VOICE_STATE, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS)
                     .setStatus(OnlineStatus.ONLINE)
                     .build().awaitReady()
         } catch (ex: LoginException) {
             plugin.logger.log(Level.WARNING, "Discord bot was unable to start! Please verify the bot token is correct.")
             plugin.pluginLoader.disablePlugin(plugin)
+            null
         } catch (ex: InterruptedException) {
             plugin.logger.log(Level.WARNING, "Discord bot was unable to start! Please verify the bot token is correct.")
-            plugin.pluginLoader.disablePlugin(plugin)
+            null
         }
     }
 

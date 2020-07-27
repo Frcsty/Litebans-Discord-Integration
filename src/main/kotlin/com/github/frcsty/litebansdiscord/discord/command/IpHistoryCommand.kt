@@ -2,9 +2,9 @@ package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.HistoryHolder
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.getUserIPHistory
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.hasMissingPermission
-import com.github.frcsty.litebansdiscord.discord.util.Utilities.isNotUser
+import com.github.frcsty.litebansdiscord.discord.util.getUserIPHistory
+import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
+import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import me.mattstudios.mfjda.annotations.Command
 import me.mattstudios.mfjda.annotations.Default
 import me.mattstudios.mfjda.base.CommandBase
@@ -23,9 +23,8 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
         val channel = message.channel
         val user = message.author
 
-        if (isNotUser(user, message)) return
-        if (message.member == null) return
-        if (hasMissingPermission(message.member!!, plugin.config.getString("settings.requiredRoleId"))) {
+        if (user.isNotMember(message)) return
+        if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
             channel.sendMessage("You do not have the required permission for this!").queue()
             return
         }
@@ -37,7 +36,7 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
         }
 
         val player = Bukkit.getOfflinePlayer(args[1])
-        val holders = getUserIPHistory(player)
+        val holders = player.getUserIPHistory()
         if (holders.isEmpty()) {
             channel.sendMessage("User ${player.name} has no logic history.").queue()
             return
