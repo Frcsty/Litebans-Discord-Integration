@@ -5,24 +5,26 @@ import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
 import com.github.frcsty.litebansdiscord.discord.util.getUserBans
 import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
 import com.github.frcsty.litebansdiscord.discord.util.isNotMember
-import me.mattstudios.mfjda.annotations.Command
-import me.mattstudios.mfjda.annotations.Default
-import me.mattstudios.mfjda.base.CommandBase
-import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.core.hooks.ListenerAdapter
 import org.apache.commons.lang.StringUtils
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.awt.Color
 import java.util.*
 
-@Command("history")
-class HistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
+class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
-    @Default
-    fun historyCommand() {
-        println("Ran history command")
-        val channel = message.channel
-        val user = message.author
+    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+        val message = event.message
+        val content = message.contentRaw
+        if (content.startsWith("${plugin.prefix}history").not() && !content.startsWith(event.guild.selfMember.asMention)) {
+            return
+        }
+
+        val channel = event.channel
+        val user = event.author
 
         if (user.isNotMember(message)) return
         if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
@@ -30,7 +32,7 @@ class HistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
             return
         }
 
-        val args = message.contentRaw.split(" ").toTypedArray()
+        val args = content.split(" ").toTypedArray()
         if (args.size == 1) {
             channel.sendMessage("You did not specify a user to check!").queue()
             return

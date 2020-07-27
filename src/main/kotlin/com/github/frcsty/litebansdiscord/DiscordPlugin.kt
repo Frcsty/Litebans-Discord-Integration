@@ -5,6 +5,8 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class DiscordPlugin : JavaPlugin() {
 
+    val prefix = "-"
+
     override fun onEnable() {
         saveDefaultConfig()
 
