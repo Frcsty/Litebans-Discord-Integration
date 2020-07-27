@@ -1,4 +1,4 @@
-name: LiteBansDiscord
+name: DiscordPlugin
 version: @version@
-main: com.github.frcsty.litebansdiscord.LiteBansDiscord
+main: com.github.frcsty.litebansdiscord.DiscordPlugin
 depend: ["LiteBans"]

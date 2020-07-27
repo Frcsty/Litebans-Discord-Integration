@@ -21,7 +21,8 @@ repositories {
 
 dependencies {
 	testImplementation "junit:junit:3.8.2"
-	implementation "net.dv8tion:JDA:3.8.3_463"
+	implementation "net.dv8tion:JDA:4.2.0_182"
+	implementation "me.mattstudios.utils:matt-framework-jda:1.1.14-BETA"
 	compileOnly "com.gitlab.ruany:LiteBansAPI:0.3.4"
 	compileOnly "com.destroystokyo.paper:paper-api:1.16.1-R0.1-SNAPSHOT"
 }
