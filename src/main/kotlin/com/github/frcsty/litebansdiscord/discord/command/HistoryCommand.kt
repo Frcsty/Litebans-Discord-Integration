@@ -21,7 +21,6 @@ class HistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
     @Default
     fun historyCommand() {
         println("Ran history command")
-        val message = message
         val channel = message.channel
         val user = message.author
 

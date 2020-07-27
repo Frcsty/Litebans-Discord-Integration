@@ -19,7 +19,6 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : CommandBase() {
 
     @Default
     fun ipHistoryCommand() {
-        val message = message
         val channel = message.channel
         val user = message.author
 
