@@ -1,18 +1,14 @@
 package com.github.frcsty.litebansdiscord.discord;
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin;
-import com.github.frcsty.litebansdiscord.discord.command.CheckBanCommand;
-import com.github.frcsty.litebansdiscord.discord.command.HistoryCommand;
-import com.github.frcsty.litebansdiscord.discord.command.IpHistoryCommand;
-import me.mattstudios.mfjda.base.CommandManager;
-import net.dv8tion.jda.api.AccountType;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import javax.security.auth.login.LoginException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Level;
 
 public final class Discord {
@@ -33,27 +29,20 @@ public final class Discord {
             return;
         }
 
-        if (startBot()) {
-            final CommandManager commandManager = new CommandManager(jda);
-
-            commandManager.register(Arrays.asList(
-                    new CheckBanCommand(plugin),
-                    new HistoryCommand(plugin),
-                    new IpHistoryCommand(plugin)
-            ));
-        }
+        startBot();
     }
 
-    private boolean startBot() {
+    private void startBot() {
         try {
-            final JDABuilder builder = new JDABuilder(AccountType.BOT);
-            builder.setToken(config.getString("settings.token"));
-            builder.setStatus(OnlineStatus.ONLINE);
-            jda = builder.build().awaitReady();
+            jda = JDABuilder.create(config.getString("settings.token"), Collections.emptyList())
+                    .disableCache(CacheFlag.ACTIVITY, CacheFlag.VOICE_STATE, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS)
+                    .setStatus(OnlineStatus.ONLINE)
+                    .build().awaitReady();
         } catch (final LoginException | InterruptedException ex) {
             plugin.getLogger().log(Level.WARNING, "Discord bot was unable to start! Please verify the bot token is correct.");
-            return false;
+            plugin.getPluginLoader().disablePlugin(plugin);
         }
-        return true;
     }
+
+    public JDA getJda() { return this.jda; }
 }
