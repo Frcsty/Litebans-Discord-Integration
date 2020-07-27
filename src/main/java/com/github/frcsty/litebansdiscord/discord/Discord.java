@@ -1,22 +1,27 @@
 package com.github.frcsty.litebansdiscord.discord;
 
-import com.github.frcsty.litebansdiscord.LiteBansDiscord;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
+import com.github.frcsty.litebansdiscord.DiscordPlugin;
+import com.github.frcsty.litebansdiscord.discord.command.CheckBanCommand;
+import com.github.frcsty.litebansdiscord.discord.command.HistoryCommand;
+import com.github.frcsty.litebansdiscord.discord.command.IpHistoryCommand;
+import me.mattstudios.mfjda.base.CommandManager;
+import net.dv8tion.jda.api.AccountType;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import javax.security.auth.login.LoginException;
+import java.util.Arrays;
 import java.util.logging.Level;
 
 public final class Discord {
 
-    private final LiteBansDiscord plugin;
+    private final DiscordPlugin plugin;
     private final FileConfiguration config;
     private JDA jda;
 
-    public Discord(final LiteBansDiscord plugin) {
+    public Discord(final DiscordPlugin plugin) {
         this.plugin = plugin;
         this.config = plugin.getConfig();
 
@@ -29,7 +34,13 @@ public final class Discord {
         }
 
         if (startBot()) {
-            jda.addEventListener(new DiscordListener(plugin));
+            final CommandManager commandManager = new CommandManager(jda);
+
+            commandManager.register(Arrays.asList(
+                    new CheckBanCommand(plugin),
+                    new HistoryCommand(plugin),
+                    new IpHistoryCommand(plugin)
+            ));
         }
     }
 
@@ -45,5 +56,4 @@ public final class Discord {
         }
         return true;
     }
-
 }
