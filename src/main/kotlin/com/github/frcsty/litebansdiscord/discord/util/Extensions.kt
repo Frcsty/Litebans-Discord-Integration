@@ -20,7 +20,7 @@ fun Member?.hasMissingPermission(roleId: String?): Boolean {
     if (this.hasPermission(Permission.MANAGE_SERVER)) return false
     val requiredRole = this.guild.getRoleById(roleId)
 
-    return requiredRole != null && this.roles.stream().anyMatch { role: Role -> role.position >= requiredRole.position }
+    return requiredRole == null || this.roles.stream().anyMatch { role: Role -> role.position <= requiredRole.position }
 }
 
 fun OfflinePlayer.getUserBans(): List<InformationHolder> {
