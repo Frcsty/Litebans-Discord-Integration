@@ -2,16 +2,17 @@ package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
+import com.github.frcsty.litebansdiscord.discord.util.getOfflineUser
 import com.github.frcsty.litebansdiscord.discord.util.getUserBans
 import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 import org.apache.commons.lang.StringUtils
-import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.awt.Color
 import java.util.*
+
 
 class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
@@ -26,7 +27,10 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         val channel = event.channel
         val user = event.author
 
-        if (user.isNotMember(message)) return
+        if (user.isNotMember(message)) {
+            channel.sendMessage("sent by a bot")
+            return
+        }
         /*
         if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
             channel.sendMessage("You do not have the required permission for this!").queue()
@@ -40,7 +44,11 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             return
         }
 
-        val player = Bukkit.getOfflinePlayer(args[1])
+        val player = getOfflineUser(args[1])
+        if (player == null) {
+            channel.sendMessage("Specified user does not exist! (User: ${args[1]})")
+            return
+        }
         val holders = player.getUserBans()
         val fromPosition = if (args.size < 3) 0 else Integer.valueOf(args[2])
         val toPosition = if (args.size < 4) fromPosition + 5 else Integer.valueOf(args[3])
@@ -48,7 +56,7 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             channel.sendMessage("User ${player.name} has no history.").queue()
             return
         }
-        message.delete().queue()
+
         channel.sendMessage(getFormattedEmbed(holders, player, fromPosition, toPosition, start).build()).queue()
     }
 
@@ -57,13 +65,12 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         val builder = StringBuilder()
         embedBuilder.setTitle("History for ${player.name} (Limit: ${holders.size}):")
 
-        var i = from
-        while (i < to) {
+        for (i in from until to) {
             if (holders.size < i + 1) continue
             val holder = holders[i]
             builder.append(getFormattedHistoryInformation(holder, i))
-            i++
         }
+
         embedBuilder.setDescription(builder.toString())
         embedBuilder.setFooter("Executed in ${System.currentTimeMillis() - start}ms", null)
         return embedBuilder

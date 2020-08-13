@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.Role
 import net.dv8tion.jda.core.entities.User
+import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.sql.SQLException
 import java.util.*
@@ -21,6 +22,18 @@ fun Member?.hasMissingPermission(roleId: String?): Boolean {
     val requiredRole = this.guild.getRoleById(roleId)
 
     return requiredRole == null || this.roles.stream().anyMatch { role: Role -> role.position <= requiredRole.position }
+}
+
+fun getOfflineUser(name: String): OfflinePlayer? {
+    var resultPlayer: OfflinePlayer? = null
+    for (player in Bukkit.getOfflinePlayers()) {
+        if (player.name.equals(name, ignoreCase = true)) {
+            resultPlayer = player
+            break
+        }
+    }
+
+    return resultPlayer
 }
 
 fun OfflinePlayer.getUserBans(): List<InformationHolder> {
