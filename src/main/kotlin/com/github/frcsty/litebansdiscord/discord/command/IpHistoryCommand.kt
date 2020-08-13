@@ -16,6 +16,7 @@ import java.util.function.Consumer
 class IpHistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+        val start = System.currentTimeMillis()
         val message = event.message
         val content = message.contentRaw
         if (content.startsWith("${plugin.prefix}iphistory").not() && !content.startsWith(event.guild.selfMember.asMention)) {
@@ -40,19 +41,21 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         val player = Bukkit.getOfflinePlayer(args[1])
         val holders = player.getUserIPHistory()
         if (holders.isEmpty()) {
-            channel.sendMessage("User ${player.name} has no logic history.").queue()
+            channel.sendMessage("User ${player.name} has not logged in before.").queue()
             return
         }
 
-        channel.sendMessage(getFormattedEmbed(player, holders).build()).queue()
+        message.delete().queue()
+        channel.sendMessage(getFormattedEmbed(player, holders, start).build()).queue()
     }
 
-    private fun getFormattedEmbed(player: OfflinePlayer, holders: List<HistoryHolder>): EmbedBuilder {
+    private fun getFormattedEmbed(player: OfflinePlayer, holders: List<HistoryHolder>, start: Long): EmbedBuilder {
         val embedBuilder = EmbedBuilder().setColor(Color.CYAN)
         val builder = StringBuilder()
         embedBuilder.setTitle("Login history for ${player.name} (Limit: ${holders.size}):")
         holders.forEach(Consumer { holder: HistoryHolder -> builder.append(getFormattedIPHistoryInformation(holder)) })
         embedBuilder.setDescription(builder.toString())
+        embedBuilder.setFooter("Executed in ${System.currentTimeMillis() - start}ms", null)
         return embedBuilder
     }
 

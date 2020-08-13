@@ -3,7 +3,6 @@ package com.github.frcsty.litebansdiscord.discord.command
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
 import com.github.frcsty.litebansdiscord.discord.util.getUserBans
-import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
 import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -17,6 +16,7 @@ import java.util.*
 class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+        val start = System.currentTimeMillis()
         val message = event.message
         val content = message.contentRaw
         if (content.startsWith("${plugin.prefix}history").not() && !content.startsWith(event.guild.selfMember.asMention)) {
@@ -27,10 +27,12 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         val user = event.author
 
         if (user.isNotMember(message)) return
+        /*
         if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
             channel.sendMessage("You do not have the required permission for this!").queue()
             return
         }
+        */
 
         val args = content.split(" ").toTypedArray()
         if (args.size == 1) {
@@ -46,31 +48,35 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             channel.sendMessage("User ${player.name} has no history.").queue()
             return
         }
-        channel.sendMessage(getFormattedEmbed(holders, player, fromPosition, toPosition).build()).queue()
+        message.delete().queue()
+        channel.sendMessage(getFormattedEmbed(holders, player, fromPosition, toPosition, start).build()).queue()
     }
 
-    private fun getFormattedEmbed(holders: List<InformationHolder>, player: OfflinePlayer, from: Int, to: Int): EmbedBuilder {
+    private fun getFormattedEmbed(holders: List<InformationHolder>, player: OfflinePlayer, from: Int, to: Int, start: Long): EmbedBuilder {
         val embedBuilder = EmbedBuilder().setColor(Color.CYAN)
         val builder = StringBuilder()
         embedBuilder.setTitle("History for ${player.name} (Limit: ${holders.size}):")
-        for (i in from until to) {
+
+        var i = from
+        while (i < to) {
             if (holders.size < i + 1) continue
             val holder = holders[i]
             builder.append(getFormattedHistoryInformation(holder, i))
+            i++
         }
         embedBuilder.setDescription(builder.toString())
+        embedBuilder.setFooter("Executed in ${System.currentTimeMillis() - start}ms", null)
         return embedBuilder
     }
 
     private fun getFormattedHistoryInformation(holder: InformationHolder, position: Int): StringBuilder {
-        val position = position + 1
         val time = Date(holder.time)
         val expiry = Date(holder.until)
         val active = StringUtils.capitalize(holder.isActive.toString())
 
         val builder = StringBuilder()
         builder.append("```\n")
-        builder.append("[$position] Time: $time\n")
+        builder.append("[${position + 1}] Time: $time\n")
         builder.append(" - Reason: ${holder.reason}\n")
         builder.append(" - Banned By: ${holder.punisher}\n")
         if (holder.isActive) {

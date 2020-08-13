@@ -3,7 +3,6 @@ package com.github.frcsty.litebansdiscord.discord.command
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
 import com.github.frcsty.litebansdiscord.discord.util.getUserBans
-import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
 import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import litebans.api.Database
 import net.dv8tion.jda.core.EmbedBuilder
@@ -17,6 +16,7 @@ import java.util.*
 class CheckBanCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+        val start = System.currentTimeMillis()
         val message = event.message
         val content = message.contentRaw
         if (content.startsWith("${plugin.prefix}checkban").not() && !content.startsWith(event.guild.selfMember.asMention)) {
@@ -27,10 +27,12 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         val user = event.author
 
         if (user.isNotMember(message)) return
+        /*
         if (message.member.hasMissingPermission(plugin.config.getString("settings.requiredRoleId"))) {
             channel.sendMessage("You do not have the required permission for this!").queue()
             return
         }
+        */
 
         val args = content.split(" ").toTypedArray()
         if (args.size == 1) {
@@ -56,13 +58,15 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             channel.sendMessage("Punishment data for user ${player.name} is incomplete or missing!").queue()
             return
         }
-        channel.sendMessage(getFormattedEmbed(player, activeHolder).build()).queue()
+        message.delete().queue()
+        channel.sendMessage(getFormattedEmbed(player, activeHolder, start).build()).queue()
     }
 
-    private fun getFormattedEmbed(player: OfflinePlayer, holder: InformationHolder): EmbedBuilder {
+    private fun getFormattedEmbed(player: OfflinePlayer, holder: InformationHolder, start: Long): EmbedBuilder {
         val embedBuilder = EmbedBuilder().setColor(Color.CYAN)
         embedBuilder.setTitle("Target ${player.name} is banned:")
         embedBuilder.setDescription(getFormattedCheckBanInformation(holder))
+        embedBuilder.setFooter("Executed in ${System.currentTimeMillis() - start}ms", null)
         return embedBuilder
     }
 
