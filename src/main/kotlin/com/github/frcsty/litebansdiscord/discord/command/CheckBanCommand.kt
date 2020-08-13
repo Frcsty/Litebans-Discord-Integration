@@ -2,13 +2,13 @@ package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
+import com.github.frcsty.litebansdiscord.discord.util.getOfflineUser
 import com.github.frcsty.litebansdiscord.discord.util.getUserBans
 import com.github.frcsty.litebansdiscord.discord.util.isNotMember
 import litebans.api.Database
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
-import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.awt.Color
 import java.util.*
@@ -40,7 +40,11 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             return
         }
 
-        val player = Bukkit.getOfflinePlayer(args[1])
+        val player = getOfflineUser(args[1])
+        if (player == null) {
+            channel.sendMessage("Specified user does not exist! (User: ${args[1]})")
+            return
+        }
         val isBanned = Database.get().isPlayerBanned(player.uniqueId, null)
         if (!isBanned) {
             channel.sendMessage("User ${player.name} is not banned!").queue()
@@ -58,7 +62,7 @@ class CheckBanCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             channel.sendMessage("Punishment data for user ${player.name} is incomplete or missing!").queue()
             return
         }
-        message.delete().queue()
+
         channel.sendMessage(getFormattedEmbed(player, activeHolder, start).build()).queue()
     }
 

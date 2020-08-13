@@ -1,14 +1,10 @@
 package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
-import com.github.frcsty.litebansdiscord.discord.util.HistoryHolder
-import com.github.frcsty.litebansdiscord.discord.util.getUserIPHistory
-import com.github.frcsty.litebansdiscord.discord.util.hasMissingPermission
-import com.github.frcsty.litebansdiscord.discord.util.isNotMember
+import com.github.frcsty.litebansdiscord.discord.util.*
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
-import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import java.awt.Color
 import java.util.function.Consumer
@@ -38,14 +34,17 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
             return
         }
 
-        val player = Bukkit.getOfflinePlayer(args[1])
+        val player = getOfflineUser(args[1])
+        if (player == null) {
+            channel.sendMessage("Specified user does not exist! (User: ${args[1]})")
+            return
+        }
         val holders = player.getUserIPHistory()
         if (holders.isEmpty()) {
             channel.sendMessage("User ${player.name} has not logged in before.").queue()
             return
         }
 
-        message.delete().queue()
         channel.sendMessage(getFormattedEmbed(player, holders, start).build()).queue()
     }
 
