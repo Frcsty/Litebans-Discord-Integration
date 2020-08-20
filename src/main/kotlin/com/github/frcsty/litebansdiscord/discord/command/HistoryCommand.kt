@@ -58,6 +58,7 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         }
 
         channel.sendMessage(getFormattedEmbed(holders, player, fromPosition, toPosition, start).build()).queue()
+
     }
 
     private fun getFormattedEmbed(holders: List<InformationHolder>, player: OfflinePlayer, from: Int, to: Int, start: Long): EmbedBuilder {
