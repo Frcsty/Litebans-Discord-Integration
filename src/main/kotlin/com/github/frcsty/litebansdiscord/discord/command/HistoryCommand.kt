@@ -5,14 +5,13 @@ import com.github.frcsty.litebansdiscord.discord.util.InformationHolder
 import com.github.frcsty.litebansdiscord.discord.util.getOfflineUser
 import com.github.frcsty.litebansdiscord.discord.util.getUserBans
 import com.github.frcsty.litebansdiscord.discord.util.isNotMember
-import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.core.hooks.ListenerAdapter
+import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.apache.commons.lang.StringUtils
 import org.bukkit.OfflinePlayer
 import java.awt.Color
 import java.util.*
-
 
 class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
@@ -28,7 +27,6 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
         val user = event.author
 
         if (user.isNotMember(message)) {
-            channel.sendMessage("sent by a bot")
             return
         }
         /*
@@ -46,7 +44,7 @@ class HistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
         val player = getOfflineUser(args[1])
         if (player == null) {
-            channel.sendMessage("Specified user does not exist! (User: ${args[1]})")
+            channel.sendMessage("Specified user does not exist! (User: ${args[1]})").queue()
             return
         }
         val holders = player.getUserBans()

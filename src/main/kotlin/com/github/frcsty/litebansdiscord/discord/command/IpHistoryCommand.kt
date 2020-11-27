@@ -2,9 +2,9 @@ package com.github.frcsty.litebansdiscord.discord.command
 
 import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.util.*
-import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.core.hooks.ListenerAdapter
+import net.dv8tion.jda.api.EmbedBuilder
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.api.hooks.ListenerAdapter
 import org.bukkit.OfflinePlayer
 import java.awt.Color
 import java.util.function.Consumer
@@ -36,9 +36,10 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
 
         val player = getOfflineUser(args[1])
         if (player == null) {
-            channel.sendMessage("Specified user does not exist! (User: ${args[1]})")
+            channel.sendMessage("Specified user does not exist! (User: ${args[1]})").queue()
             return
         }
+
         val holders = player.getUserIPHistory()
         if (holders.isEmpty()) {
             channel.sendMessage("User ${player.name} has not logged in before.").queue()
@@ -51,10 +52,13 @@ class IpHistoryCommand(private val plugin: DiscordPlugin) : ListenerAdapter() {
     private fun getFormattedEmbed(player: OfflinePlayer, holders: List<HistoryHolder>, start: Long): EmbedBuilder {
         val embedBuilder = EmbedBuilder().setColor(Color.CYAN)
         val builder = StringBuilder()
+
         embedBuilder.setTitle("Login history for ${player.name} (Limit: ${holders.size}):")
+
         holders.forEach(Consumer { holder: HistoryHolder -> builder.append(getFormattedIPHistoryInformation(holder)) })
         embedBuilder.setDescription(builder.toString())
         embedBuilder.setFooter("Executed in ${System.currentTimeMillis() - start}ms", null)
+
         return embedBuilder
     }
 

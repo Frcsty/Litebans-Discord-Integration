@@ -4,9 +4,9 @@ import com.github.frcsty.litebansdiscord.DiscordPlugin
 import com.github.frcsty.litebansdiscord.discord.command.CheckBanCommand
 import com.github.frcsty.litebansdiscord.discord.command.HistoryCommand
 import com.github.frcsty.litebansdiscord.discord.command.IpHistoryCommand
-import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.JDABuilder
-import net.dv8tion.jda.core.OnlineStatus
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.OnlineStatus
 import java.util.logging.Level
 import javax.security.auth.login.LoginException
 
@@ -24,7 +24,7 @@ class Discord(private val plugin: DiscordPlugin) {
 
     private fun startBot(): JDA? {
         return try {
-            JDABuilder().setToken(plugin.config.getString("settings.token"))
+            JDABuilder.createDefault(plugin.config.getString("settings.token"))
                     .setStatus(OnlineStatus.ONLINE)
                     .build().awaitReady()
         } catch (ex: LoginException) {
