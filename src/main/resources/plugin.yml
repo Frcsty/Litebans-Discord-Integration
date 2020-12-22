@@ -1,0 +1,6 @@
+name: LitebansDiscordJava
+version: @version@
+main: com.github.frcsty.litebansdiscordjava.LitebansDiscordPlugin
+api-version: 1.13
+author: Frcsty
+depend: ["LiteBans"]
