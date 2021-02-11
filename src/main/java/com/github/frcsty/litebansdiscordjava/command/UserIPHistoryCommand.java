@@ -2,8 +2,12 @@ package com.github.frcsty.litebansdiscordjava.command;
 
 import com.github.frcsty.litebansdiscordjava.command.holder.HistoryHolder;
 import com.github.frcsty.litebansdiscordjava.command.util.InformationUtil;
+import com.github.frcsty.litebansdiscordjava.util.Task;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bukkit.Bukkit;
@@ -24,57 +28,59 @@ public final class UserIPHistoryCommand extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
-        final long start = System.currentTimeMillis();
-        final TextChannel channel = event.getChannel();
-        final Message message = event.getMessage();
-        final String content = message.getContentRaw();
+        Task.async(() -> {
+            final long start = System.currentTimeMillis();
+            final TextChannel channel = event.getChannel();
+            final Message message = event.getMessage();
+            final String content = message.getContentRaw();
 
-        if (!content.startsWith("-iphistory")) {
-            return;
-        }
+            if (!content.startsWith("-iphistory")) {
+                return;
+            }
 
-        final Member member = event.getMember();
-        if (member == null) return;
-        if (member.getUser().isBot()) return;
+            final Member member = event.getMember();
+            if (member == null) return;
+            if (member.getUser().isBot()) return;
 
-        if (!hasRequiredRole(member)) {
-            channel.sendMessage(
-                    "You do not have permission to execute this command!"
-            ).queue();
-            return;
-        }
+            if (!hasRequiredRole(member)) {
+                channel.sendMessage(
+                        "You do not have permission to execute this command!"
+                ).queue();
+                return;
+            }
 
-        final String[] arguments = content.split(" ");
-        if (arguments.length <= 1) {
-            channel.sendMessage(
-                    "The entered command requires a 'Minecraft User' (Name or UUID) parameter!"
-            ).queue();
-            return;
-        }
+            final String[] arguments = content.split(" ");
+            if (arguments.length <= 1) {
+                channel.sendMessage(
+                        "The entered command requires a 'Minecraft User' (Name or UUID) parameter!"
+                ).queue();
+                return;
+            }
 
-        final String argument = arguments[1];
-        UUID userIdentifier;
-        OfflinePlayer player;
+            final String argument = arguments[1];
+            UUID userIdentifier;
+            OfflinePlayer player;
 
-        if (argument.length() == 36) {
-            userIdentifier = UUID.fromString(argument);
+            if (argument.length() == 36) {
+                userIdentifier = UUID.fromString(argument);
 
-            player = Bukkit.getOfflinePlayer(userIdentifier);
-        } else {
-            player = Bukkit.getOfflinePlayer(argument);
+                player = Bukkit.getOfflinePlayer(userIdentifier);
+            } else {
+                player = Bukkit.getOfflinePlayer(argument);
 
-            userIdentifier = player.getUniqueId();
-        }
+                userIdentifier = player.getUniqueId();
+            }
 
-        final List<HistoryHolder> holders = InformationUtil.getUserIPHistory(userIdentifier);
-        if (holders.isEmpty()) {
-            channel.sendMessage(
-                    "The specified user ('" + player.getName() + "') does not have any IP history!"
-            ).queue();
-            return;
-        }
+            final List<HistoryHolder> holders = InformationUtil.getUserIPHistory(userIdentifier);
+            if (holders.isEmpty()) {
+                channel.sendMessage(
+                        "The specified user ('" + player.getName() + "') does not have any IP history!"
+                ).queue();
+                return;
+            }
 
-        channel.sendMessage(getFormattedEmbedBuilder(holders, player, start).build()).queue();
+            channel.sendMessage(getFormattedEmbedBuilder(holders, player, start).build()).queue();
+        });
     }
 
     private boolean hasRequiredRole(final Member user) {

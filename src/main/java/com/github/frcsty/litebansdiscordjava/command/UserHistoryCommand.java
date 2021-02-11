@@ -2,6 +2,7 @@ package com.github.frcsty.litebansdiscordjava.command;
 
 import com.github.frcsty.litebansdiscordjava.command.holder.InformationHolder;
 import com.github.frcsty.litebansdiscordjava.command.util.InformationUtil;
+import com.github.frcsty.litebansdiscordjava.util.Task;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -20,49 +21,51 @@ public final class UserHistoryCommand extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
-        final long start = System.currentTimeMillis();
-        final TextChannel channel = event.getChannel();
-        final Message message = event.getMessage();
-        final String content = message.getContentRaw();
+        Task.async(() -> {
+            final long start = System.currentTimeMillis();
+            final TextChannel channel = event.getChannel();
+            final Message message = event.getMessage();
+            final String content = message.getContentRaw();
 
-        if (!content.startsWith("-history")) {
-            return;
-        }
+            if (!content.startsWith("-history")) {
+                return;
+            }
 
-        final String[] arguments = content.split(" ");
-        if (arguments.length <= 1) {
-            channel.sendMessage(
-                    "The entered command requires a 'Minecraft User' (Name or UUID) parameter!"
-            ).queue();
-            return;
-        }
+            final String[] arguments = content.split(" ");
+            if (arguments.length <= 1) {
+                channel.sendMessage(
+                        "The entered command requires a 'Minecraft User' (Name or UUID) parameter!"
+                ).queue();
+                return;
+            }
 
-        final String argument = arguments[1];
-        UUID userIdentifier;
-        OfflinePlayer player;
+            final String argument = arguments[1];
+            UUID userIdentifier;
+            OfflinePlayer player;
 
-        if (argument.length() == 36) {
-            userIdentifier = UUID.fromString(argument);
+            if (argument.length() == 36) {
+                userIdentifier = UUID.fromString(argument);
 
-            player = Bukkit.getOfflinePlayer(userIdentifier);
-        } else {
-            player = Bukkit.getOfflinePlayer(argument);
+                player = Bukkit.getOfflinePlayer(userIdentifier);
+            } else {
+                player = Bukkit.getOfflinePlayer(argument);
 
-            userIdentifier = player.getUniqueId();
-        }
+                userIdentifier = player.getUniqueId();
+            }
 
-        final List<InformationHolder> holders = InformationUtil.getUserBans(userIdentifier);
-        if (holders.isEmpty()) {
-            channel.sendMessage(
-                    "The specified user ('" + player.getName() + "') does not have any history!"
-            ).queue();
-            return;
-        }
+            final List<InformationHolder> holders = InformationUtil.getUserBans(userIdentifier);
+            if (holders.isEmpty()) {
+                channel.sendMessage(
+                        "The specified user ('" + player.getName() + "') does not have any history!"
+                ).queue();
+                return;
+            }
 
-        final int fromPosition = arguments.length < 3 ? 0 : Integer.parseInt(arguments[2]);
-        final int toPosition = arguments.length < 4 ? fromPosition + 5 : Integer.parseInt(arguments[3]);
+            final int fromPosition = arguments.length < 3 ? 0 : Integer.parseInt(arguments[2]);
+            final int toPosition = arguments.length < 4 ? fromPosition + 5 : Integer.parseInt(arguments[3]);
 
-        channel.sendMessage(getFormattedEmbedBuilder(holders, player, fromPosition, toPosition, start).build()).queue();
+            channel.sendMessage(getFormattedEmbedBuilder(holders, player, fromPosition, toPosition, start).build()).queue();
+        });
     }
 
     private EmbedBuilder getFormattedEmbedBuilder(final List<InformationHolder> holders, final OfflinePlayer player, final int from, final int to, final long start) {
